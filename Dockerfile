@@ -9,6 +9,6 @@ RUN apt update \
     && apt install -y youtube-dl \
     && rm -rf /var/lib/apt/lists/*
 
-ARG JAR_FILE=target/*.jar
+ARG JAR_FILE=jar/*.jar
 COPY ${JAR_FILE} app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
