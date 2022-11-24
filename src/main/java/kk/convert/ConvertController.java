@@ -38,12 +38,9 @@ public class ConvertController {
     public ResponseEntity<Resource> getFile(@PathVariable("file-name") String fileName) throws FileNotFoundException {
         final File file = new File("music/" + fileName);
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
-        ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
-                .filename(fileName)
-                .build();
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.CONTENT_DISPOSITION);
-        headers.setContentDisposition(contentDisposition);
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
         return ResponseEntity.ok()
                 .contentLength(file.length())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
