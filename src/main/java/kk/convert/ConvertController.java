@@ -88,7 +88,6 @@ public class ConvertController {
         String status = getCurrentProcessingStatus();
         return listFiles("music", 1).stream()
                 .map(fileName -> {
-                    System.out.println(fileName);
                     File file = new File("music/" + fileName);
                     float mb = (float) file.length() / 1000_000;
                     if (fileName.endsWith(".mp3")) {
@@ -98,8 +97,10 @@ public class ConvertController {
                                 .status("ready").build();
                     }
                     else {
+                        String withoutPart = fileName.substring(0, fileName.indexOf(".part"));
+                        String withoutExt = withoutPart.substring(0, withoutPart.lastIndexOf("."));
                         return SongDto.builder()
-                                .name(fileName.substring(0, fileName.indexOf(".webm.part")))
+                                .name(withoutExt)
                                 .size(String.format("%.1f", mb) + " MB")
                                 .status(status).build();
                     }
