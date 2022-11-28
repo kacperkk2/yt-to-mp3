@@ -88,6 +88,7 @@ public class ConvertController {
         String status = getCurrentProcessingStatus();
         return listFiles("music", 1).stream()
                 .map(fileName -> {
+                    System.out.println(fileName);
                     File file = new File("music/" + fileName);
                     float mb = (float) file.length() / 1000_000;
                     if (fileName.endsWith(".mp3")) {
