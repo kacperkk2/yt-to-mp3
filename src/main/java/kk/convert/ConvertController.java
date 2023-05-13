@@ -92,9 +92,9 @@ public class ConvertController {
     }
 
     @GetMapping("/status")
-    public List<SongDto> status() throws IOException {
+    public StatusDto status() throws IOException {
         String status = getCurrentProcessingStatus();
-        return listFiles("music", 1).stream()
+        List<SongDto> songDtos = listFiles("music", 1).stream()
                 .filter(fileName -> fileName.endsWith(".mp3") || fileName.endsWith(".webm.ytdl"))
                 .map(fileName -> {
                     File file = new File("music/" + fileName);
@@ -104,8 +104,7 @@ public class ConvertController {
                                 .name(fileName.substring(0, fileName.indexOf(".mp3")))
                                 .size(String.format("%.1f", mb) + " MB")
                                 .status("ready").build();
-                    }
-                    else {
+                    } else {
                         String withoutExt = fileName.substring(0, fileName.indexOf(".webm.ytdl"));
                         return SongDto.builder()
                                 .name(withoutExt)
@@ -113,6 +112,10 @@ public class ConvertController {
                                 .status(status).build();
                     }
                 }).toList();
+        return StatusDto.builder()
+                .downloadOngoing(process != null && process.isAlive())
+                .songs(songDtos)
+                .build();
     }
 
     @PostMapping("/download")
