@@ -1,5 +1,6 @@
 package kk.convert;
 
+import antlr.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -15,8 +16,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -29,6 +29,8 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 public class ConvertController {
     private static final String UNIT = "MB";
+    private static final String FORBIDDEN_CHARS_WORD_MATCH_REGEX = ".*[\\[\\]].*";
+    private static final String FORBIDDEN_CHARS_REGEX = "[\\[\\]]";
     private BufferedReader stdInput;
     private Process process;
 
@@ -124,6 +126,26 @@ public class ConvertController {
                 .totalSizeNumber(totalSize)
                 .totalSizeUnit(UNIT)
                 .build();
+    }
+
+    @GetMapping("/songs/clean")
+    public void cleanSongsNames() throws IOException {
+        log.info("Cleaning songs names of forbidden characters");
+        List<String> files = listFiles("music", 1).stream()
+                .filter(song -> song.matches(FORBIDDEN_CHARS_WORD_MATCH_REGEX))
+                .toList();
+        if (files.isEmpty()) {
+            log.info("Not found any forbidden characters in songs names");
+            return;
+        }
+        for (String file : files) {
+            log.info("Removing forbidden characters from: {}", file);
+            String allowedName = file.replaceAll(FORBIDDEN_CHARS_REGEX, "");
+            boolean renameResult = new File("music/" + file).renameTo(new File("music/" + allowedName));
+            if (!renameResult) {
+                log.error("Renaming song from: {}, to: {} failed!", file, allowedName);
+            };
+        }
     }
 
     @PostMapping("/download")
