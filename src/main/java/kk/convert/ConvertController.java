@@ -134,7 +134,7 @@ public class ConvertController {
             return ResponseEntity.badRequest().body(null);
         }
         Runtime rt = Runtime.getRuntime();
-        process = rt.exec("yt-dlp --ignore-errors --format bestaudio --extract-audio " +
+        process = rt.exec("/scr --ignore-errors --format bestaudio --extract-audio " +
                 "--audio-format mp3 " +
                 "--audio-quality 160K " +
                 "--output music/%(title)s.%(ext)s " + url);
