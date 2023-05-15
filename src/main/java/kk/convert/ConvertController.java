@@ -28,7 +28,7 @@ import java.util.zip.ZipOutputStream;
 @CrossOrigin(origins = {"http://localhost:4200", "https://kacperkk2.github.io"})
 @Slf4j
 public class ConvertController {
-
+    private static final String UNIT = "MB";
     private BufferedReader stdInput;
     private Process process;
 
@@ -102,19 +102,27 @@ public class ConvertController {
                     if (fileName.endsWith(".mp3")) {
                         return SongDto.builder()
                                 .name(fileName.substring(0, fileName.indexOf(".mp3")))
-                                .size(String.format("%.1f", mb) + " MB")
+                                .sizeNumber(mb)
+                                .sizeUnit(UNIT)
                                 .status("ready").build();
                     } else {
                         String withoutExt = fileName.substring(0, fileName.indexOf(".webm.ytdl"));
                         return SongDto.builder()
                                 .name(withoutExt)
-                                .size(String.format("%.1f", mb) + " MB")
+                                .sizeNumber(mb)
+                                .sizeUnit(UNIT)
                                 .status(status).build();
                     }
                 }).toList();
+        double totalSize = songDtos.stream()
+                .map(SongDto::sizeNumber)
+                .mapToDouble(Double::valueOf)
+                .sum();
         return StatusDto.builder()
                 .downloadOngoing(process != null && process.isAlive())
                 .songs(songDtos)
+                .totalSizeNumber(totalSize)
+                .totalSizeUnit(UNIT)
                 .build();
     }
 
@@ -126,7 +134,7 @@ public class ConvertController {
             return ResponseEntity.badRequest().body(null);
         }
         Runtime rt = Runtime.getRuntime();
-        process = rt.exec("/scr --ignore-errors --format bestaudio --extract-audio " +
+        process = rt.exec("yt-dlp --ignore-errors --format bestaudio --extract-audio " +
                 "--audio-format mp3 " +
                 "--audio-quality 160K " +
                 "--output music/%(title)s.%(ext)s " + url);
